@@ -1,0 +1,31 @@
+server:
+  ip: localhost
+  port: 8080
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://43.136.26.67:13306/course-recommend?serverTimezone=GMT%2b8
+    username: root
+    password: password
+  redis:
+    host: 43.136.26.67
+    port: 16379
+    password: JINGwen!520665
+    database: 2
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+mybatis:
+  mapper-locations: classpath:mapper/*.xml  #扫描所有mybatis的xml文件
+#  configuration:
+#    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+files:
+  upload:
+    path: ./files/
+#    path: /home/files/
