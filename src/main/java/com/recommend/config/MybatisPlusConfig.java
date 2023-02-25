@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@MapperScan("com.qingge.springboot.mapper")
+@MapperScan("com.recommend.mapper")
 public class MybatisPlusConfig {
 
     // 最新版

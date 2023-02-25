@@ -7,7 +7,6 @@ import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.oas.annotations.EnableOpenApi;
 import springfox.documentation.service.ApiInfo;
-import springfox.documentation.service.Contact;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 
@@ -32,7 +31,7 @@ public class SwaggerConfig {
                 .useDefaultResponseMessages(true)
                 .forCodeGeneration(false)
                 .select()
-                .apis(RequestHandlerSelectors.basePackage("com.qingge.springboot.controller"))
+                .apis(RequestHandlerSelectors.basePackage("com.recommend.controller"))
                 .paths(PathSelectors.any())
                 .build();
     }
@@ -46,9 +45,8 @@ public class SwaggerConfig {
     private ApiInfo apiInfo(String title, String version) {
         return new ApiInfoBuilder()
                 .title(title)
-                .description("更多请关注: https://blog.csdn.net/xqnode")
-                .termsOfServiceUrl("https://blog.csdn.net/xqnode")
-                .contact(new Contact("xqnode", "https://blog.csdn.net/xqnode", "xiaqingweb@163.com"))
+                .description("")
+                .termsOfServiceUrl("")
                 .version(version)
                 .build();
     }
