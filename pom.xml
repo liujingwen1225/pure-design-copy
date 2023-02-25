@@ -9,9 +9,9 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.qingge</groupId>
-    <artifactId>springboot</artifactId>
+    <artifactId>recommend</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>springboot</name>
+    <name>recommend</name>
     <description>课程推荐系统</description>
     <properties>
         <java.version>1.8</java.version>

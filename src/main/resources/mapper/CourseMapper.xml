@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.qingge.springboot.mapper.CourseMapper">
+<mapper namespace="com.recommend.mapper.CourseMapper">
 
     <delete id="deleteStudentCourse">
         delete
@@ -14,7 +14,7 @@
         values (#{studentId}, #{courseId})
     </insert>
 
-    <select id="findPage" resultType="com.qingge.springboot.entity.Course">
+    <select id="findPage" resultType="com.recommend.entity.Course">
         select course.*, sys_user.nickname as teacher from course
         left join sys_user
         on course.teacher_id = sys_user.id
