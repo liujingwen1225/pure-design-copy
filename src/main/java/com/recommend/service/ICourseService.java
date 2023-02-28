@@ -13,7 +13,16 @@ import com.recommend.entity.Course;
  */
 public interface ICourseService extends IService<Course> {
 
-    Page<Course> findPage(Page<Course> page, String name);
+    Page<Course> findPage(Page<Course> page, Course course);
 
     void setStudentCourse(Integer courseId, Integer studentId);
+
+    /**
+     * 我课程列表
+     *
+     * @param course 课程
+     * @param page   页面
+     * @return {@link Page}<{@link Course}>
+     */
+    Page<Course> myCourseList(Page<Course> page, Course course);
 }

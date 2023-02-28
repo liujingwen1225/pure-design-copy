@@ -1,6 +1,8 @@
 package com.recommend.controller.dto;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.recommend.entity.Menu;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.util.List;
@@ -18,4 +20,6 @@ public class UserDTO {
     private String token;
     private String role;
     private List<Menu> menus;
+    @ApiModelProperty("用户类型：【1=新用户，2=老用户】")
+    private Integer userType;
 }

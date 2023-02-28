@@ -1,8 +1,11 @@
 package com.recommend.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.log.Log;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -11,12 +14,14 @@ import com.recommend.common.RoleEnum;
 import com.recommend.controller.dto.UserDTO;
 import com.recommend.controller.dto.UserPasswordDTO;
 import com.recommend.entity.Menu;
+import com.recommend.entity.StudentCourse;
 import com.recommend.entity.User;
 import com.recommend.exception.ServiceException;
 import com.recommend.mapper.RoleMapper;
 import com.recommend.mapper.RoleMenuMapper;
 import com.recommend.mapper.UserMapper;
 import com.recommend.service.IMenuService;
+import com.recommend.service.IStudentCourseService;
 import com.recommend.service.IUserService;
 import com.recommend.utils.TokenUtils;
 import org.springframework.stereotype.Service;
@@ -47,6 +52,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     @Resource
     private IMenuService menuService;
 
+    @Resource
+    private IStudentCourseService studentCourseService;
+
     @Override
     public UserDTO login(UserDTO userDTO) {
         // 用户密码 md5加密
@@ -57,11 +65,26 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             // 设置token
             String token = TokenUtils.genToken(one.getId().toString(), one.getPassword());
             userDTO.setToken(token);
-
+            //获取角色标识符，用户id
             String role = one.getRole(); // ROLE_ADMIN
+            Integer id = one.getId();
             // 设置用户的菜单列表
             List<Menu> roleMenus = getRoleMenus(role);
             userDTO.setMenus(roleMenus);
+            //用户类型：【1=新用户，2=老用户】
+            if (StrUtil.equals(role, "ROLE_ADMIN")) {
+                userDTO.setUserType(2);
+            } else {
+                StudentCourse studentCourseServiceOne = studentCourseService.getOne(new LambdaQueryWrapper<StudentCourse>()
+                        .eq(StudentCourse::getStudentId, id)
+                        .last("limit 1")
+                );
+                if (ObjectUtil.isNotNull(studentCourseServiceOne)) {
+                    userDTO.setUserType(2);
+                } else {
+                    userDTO.setUserType(1);
+                }
+            }
             return userDTO;
         } else {
             throw new ServiceException(Constants.CODE_600, "用户名或密码错误");

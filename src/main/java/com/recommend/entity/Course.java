@@ -1,6 +1,7 @@
 package com.recommend.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -8,6 +9,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * <p>
@@ -96,5 +98,9 @@ public class Course implements Serializable {
      */
     @ApiModelProperty(name = "封面图")
     private String coverImageUrl;
+
+    @ApiModelProperty("选课状态：【1=未选，2=已选】")
+    @TableField(exist = false)
+    private Integer courseStatus;
 
 }

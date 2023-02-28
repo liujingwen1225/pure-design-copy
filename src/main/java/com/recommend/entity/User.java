@@ -18,7 +18,6 @@ import java.util.List;
  * <p>
  *
  * </p>
- *
  */
 @Getter
 @Setter
@@ -65,5 +64,6 @@ public class User implements Serializable {
 
     @TableField(exist = false)
     private List<Course> stuCourses;
+
 
 }
