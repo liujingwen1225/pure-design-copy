@@ -24,4 +24,17 @@
             </if>
         </where>
     </select>
+
+    <select id="indexCourse" resultType="com.recommend.entity.Course">
+        select *
+        from course c
+        <where>
+            <foreach collection="typeList" item="id" open="c.type in (" separator="," close=")">
+                #{id}
+            </foreach>
+        </where>
+        order by c.participants_number * 1 desc
+        limit 12
+    </select>
+
 </mapper>

@@ -5,6 +5,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.recommend.entity.Course;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
+
 /**
  * <p>
  * Mapper 接口
@@ -19,5 +21,7 @@ public interface CourseMapper extends BaseMapper<Course> {
     void deleteStudentCourse(@Param("courseId") Integer courseId, @Param("studentId") Integer studentId);
 
     void setStudentCourse(@Param("courseId") Integer courseId, @Param("studentId") Integer studentId);
+
+    List<Course> indexCourse(List<String> typeList);
 
 }

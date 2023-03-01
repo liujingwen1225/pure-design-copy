@@ -8,13 +8,13 @@ import org.springframework.stereotype.Service;
 
 /**
  * <p>
- *  服务实现类
+ * 服务实现类
  * </p>
  *
  * @author author
  * @since 2023-02-28
  */
 @Service
-        public class StudentCourseServiceImpl extends ServiceImpl<StudentCourseMapper, StudentCourse>implements IStudentCourseService {
+public class StudentCourseServiceImpl extends ServiceImpl<StudentCourseMapper, StudentCourse> implements IStudentCourseService {
 
-        }
+}

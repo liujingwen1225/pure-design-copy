@@ -12,6 +12,8 @@ import com.recommend.service.ICourseService;
 import com.recommend.service.IStudentCourseService;
 import com.recommend.service.IUserService;
 import com.recommend.utils.TokenUtils;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.*;
 
@@ -43,10 +45,17 @@ public class CourseController {
         return Result.success();
     }
 
-    @ApiOperation("选课")
+    @ApiOperation("点击选课")
     @PostMapping("/studentCourse/{courseId}/{studentId}")
     public Result studentCourse(@PathVariable Integer courseId, @PathVariable Integer studentId) {
         courseService.setStudentCourse(courseId, studentId);
+        return Result.success();
+    }
+
+    @ApiOperation("取消选课")
+    @PostMapping("/cancelCourseSelection/{courseId}/{studentId}")
+    public Result cancelCourseSelection(@PathVariable Integer courseId, @PathVariable Integer studentId) {
+        courseService.cancelCourseSelection(courseId, studentId);
         return Result.success();
     }
 
@@ -105,9 +114,19 @@ public class CourseController {
 
     @ApiOperation("首页课程推荐")
     @GetMapping("/indexCourse")
-    public Result indexCourse(Course course) {
-        //
-        return Result.success();
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "typeList", value = "类型数组（新用户必传，老用户传空）", dataType = "List"),
+    })
+    public Result indexCourse(@RequestParam(required = false) List<String> typeList) {
+        List<Course> courseList = courseService.indexCourse(typeList);
+        return Result.success(courseList);
+    }
+
+    @ApiOperation("课程类型列表")
+    @GetMapping("/courseTypeList")
+    public Result courseTypeList() {
+        List<Course> courseList = courseService.courseTypeList();
+        return Result.success(courseList);
     }
 
     @PostMapping("/update")
