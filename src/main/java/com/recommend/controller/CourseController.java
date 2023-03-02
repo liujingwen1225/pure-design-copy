@@ -1,15 +1,13 @@
 package com.recommend.controller;
 
 
-import cn.hutool.core.util.ObjectUtil;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.recommend.common.Result;
 import com.recommend.controller.dto.PageQuery;
 import com.recommend.entity.Course;
-import com.recommend.entity.StudentCourse;
+import com.recommend.entity.User;
 import com.recommend.service.ICourseService;
-import com.recommend.service.IStudentCourseService;
 import com.recommend.service.IUserService;
 import com.recommend.utils.TokenUtils;
 import io.swagger.annotations.ApiImplicitParam;
@@ -18,6 +16,7 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
@@ -35,8 +34,6 @@ public class CourseController {
 
     @Resource
     private IUserService userService;
-    @Resource
-    private IStudentCourseService studentCourseService;
 
     // 新增或者更新
     @PostMapping
@@ -85,22 +82,12 @@ public class CourseController {
     @GetMapping("/page")
     public Result findPage(Course course, PageQuery pageQuery) {
         Page<Course> page = courseService.findPage(new Page<>(pageQuery.getPageNum(), pageQuery.getPageSize()), course);
-        //选课状态：【1=未选，2=已选】
+        Integer userId = Objects.requireNonNull(TokenUtils.getCurrentUser()).getId();
         List<Course> records = page.getRecords();
         for (Course record : records) {
-            //获取课程id，用户id
-            Integer courseId = record.getId();
-            Integer userId = Objects.requireNonNull(TokenUtils.getCurrentUser()).getId();
-            StudentCourse studentCourseServiceOne = studentCourseService.getOne(new LambdaQueryWrapper<StudentCourse>()
-                    .eq(StudentCourse::getStudentId, userId)
-                    .eq(StudentCourse::getCourseId, courseId)
-                    .last("limit 1")
-            );
-            if (ObjectUtil.isNotNull(studentCourseServiceOne)) {
-                record.setCourseStatus(2);
-            } else {
-                record.setCourseStatus(1);
-            }
+            //选课状态：【1=未选，2=已选】
+            Integer courseStatus = courseService.courseStatus(userId, record.getId());
+            record.setCourseStatus(courseStatus);
         }
         return Result.success(page);
     }
@@ -112,11 +99,9 @@ public class CourseController {
         return Result.success(page);
     }
 
-    @ApiOperation("首页课程推荐")
+    @ApiOperation("首页课程推荐列表")
     @GetMapping("/indexCourse")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "typeList", value = "类型数组（新用户必传，老用户传空）", dataType = "List"),
-    })
+    @ApiImplicitParams({@ApiImplicitParam(name = "typeList", value = "课程类型数组（新用户必传，老用户传空）", dataType = "List"),})
     public Result indexCourse(@RequestParam(required = false) List<String> typeList) {
         List<Course> courseList = courseService.indexCourse(typeList);
         return Result.success(courseList);
@@ -127,6 +112,26 @@ public class CourseController {
     public Result courseTypeList() {
         List<Course> courseList = courseService.courseTypeList();
         return Result.success(courseList);
+    }
+
+    @ApiOperation("用户类型：【1=新用户，2=老用户】")
+    @GetMapping("/userType")
+    public Result userType() {
+        HashMap<Object, Object> res = new HashMap<>(8);
+        Integer userType = courseService.userType();
+        res.put("userType", userType);
+        return Result.success(res);
+    }
+
+    @ApiOperation("保存课程类型")
+    @PostMapping("/saveCourseType/{typeList}")
+    @ApiImplicitParams({@ApiImplicitParam(name = "typeList", value = "课程类型数组", dataType = "List"),})
+    public Result saveCourseType(@PathVariable List<String> typeList) {
+        Integer userId = Objects.requireNonNull(TokenUtils.getCurrentUser()).getId();
+        LambdaUpdateWrapper<User> lambdaUpdateWrapper = new LambdaUpdateWrapper<>();
+        lambdaUpdateWrapper.eq(User::getId, userId).set(User::getCourseType, typeList.toString());
+        userService.update(null, lambdaUpdateWrapper);
+        return Result.success();
     }
 
     @PostMapping("/update")

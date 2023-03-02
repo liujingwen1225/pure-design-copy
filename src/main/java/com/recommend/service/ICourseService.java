@@ -10,8 +10,6 @@ import java.util.List;
  * <p>
  * 服务类
  * </p>
- *
- *
  */
 public interface ICourseService extends IService<Course> {
 
@@ -37,7 +35,7 @@ public interface ICourseService extends IService<Course> {
     void cancelCourseSelection(Integer courseId, Integer studentId);
 
     /**
-     * 指数课程
+     * 首页课程推荐列表
      *
      * @param typeList 类型列表
      * @return {@link List}<{@link Course}>
@@ -50,4 +48,20 @@ public interface ICourseService extends IService<Course> {
      * @return {@link List}<{@link Course}>
      */
     List<Course> courseTypeList();
+
+    /**
+     * 用户类型
+     *
+     * @return {@link Integer}
+     */
+    Integer userType();
+
+    /**
+     * 选课状态：【1=未选，2=已选】
+     *
+     * @param userId   用户id
+     * @param courseId 进程id
+     * @return {@link Integer}
+     */
+    Integer courseStatus(Integer userId, Integer courseId);
 }

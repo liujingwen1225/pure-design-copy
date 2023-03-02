@@ -69,6 +69,13 @@
             <version>4.0.0</version>
         </dependency>
 
+        <!--Tlog日志-->
+        <dependency>
+            <groupId>com.yomahub</groupId>
+            <artifactId>tlog-all-spring-boot-starter</artifactId>
+            <version>1.5.0</version>
+        </dependency>
+
         <!-- hutool  -->
         <dependency>
             <groupId>cn.hutool</groupId>

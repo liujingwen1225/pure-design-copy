@@ -8,6 +8,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * <p>
@@ -101,5 +102,9 @@ public class Course implements Serializable {
     @ApiModelProperty("选课状态：【1=未选，2=已选】")
     @TableField(exist = false)
     private Integer courseStatus;
+
+    @ApiModelProperty("课程ids")
+    @TableField(exist = false)
+    private List<Integer> courseIds;
 
 }

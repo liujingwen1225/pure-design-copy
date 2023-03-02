@@ -59,6 +59,9 @@ public class User implements Serializable {
     @ApiModelProperty("角色")
     private String role;
 
+    @ApiModelProperty("课程类型")
+    private String courseType;
+
     @TableField(exist = false)
     private List<Course> courses;
 

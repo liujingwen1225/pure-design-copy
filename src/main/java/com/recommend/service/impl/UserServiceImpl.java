@@ -66,25 +66,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             String token = TokenUtils.genToken(one.getId().toString(), one.getPassword());
             userDTO.setToken(token);
             //获取角色标识符，用户id
-            String role = one.getRole(); // ROLE_ADMIN
-            Integer id = one.getId();
+            String role = one.getRole();
+            Integer userId = one.getId();
             // 设置用户的菜单列表
             List<Menu> roleMenus = getRoleMenus(role);
             userDTO.setMenus(roleMenus);
             //用户类型：【1=新用户，2=老用户】
-            if (StrUtil.equals(role, "ROLE_ADMIN")) {
-                userDTO.setUserType(2);
-            } else {
-                StudentCourse studentCourseServiceOne = studentCourseService.getOne(new LambdaQueryWrapper<StudentCourse>()
-                        .eq(StudentCourse::getStudentId, id)
-                        .last("limit 1")
-                );
-                if (ObjectUtil.isNotNull(studentCourseServiceOne)) {
-                    userDTO.setUserType(2);
-                } else {
-                    userDTO.setUserType(1);
+            int userType = 2;
+            if (!StrUtil.equals(role, "ROLE_ADMIN")) {
+                String courseType = one.getCourseType();
+                if (StrUtil.isBlank(courseType)) {
+                    userType = 1;
                 }
             }
+            userDTO.setUserType(userType);
             return userDTO;
         } else {
             throw new ServiceException(Constants.CODE_600, "用户名或密码错误");
