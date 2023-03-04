@@ -101,9 +101,8 @@ public class CourseController {
 
     @ApiOperation("首页课程推荐列表")
     @GetMapping("/indexCourse")
-    @ApiImplicitParams({@ApiImplicitParam(name = "typeList", value = "课程类型数组（新用户必传，老用户传空）", dataType = "List"),})
-    public Result indexCourse(@RequestParam(required = false) List<String> typeList) {
-        List<Course> courseList = courseService.indexCourse(typeList);
+    public Result indexCourse() {
+        List<Course> courseList = courseService.indexCourse();
         return Result.success(courseList);
     }
 
@@ -124,12 +123,12 @@ public class CourseController {
     }
 
     @ApiOperation("保存课程类型")
-    @PostMapping("/saveCourseType/{typeList}")
-    @ApiImplicitParams({@ApiImplicitParam(name = "typeList", value = "课程类型数组", dataType = "List"),})
-    public Result saveCourseType(@PathVariable List<String> typeList) {
+    @PostMapping("/saveCourseType")
+    public Result saveCourseType(@RequestBody Course course) {
+        //用户id
         Integer userId = Objects.requireNonNull(TokenUtils.getCurrentUser()).getId();
         LambdaUpdateWrapper<User> lambdaUpdateWrapper = new LambdaUpdateWrapper<>();
-        lambdaUpdateWrapper.eq(User::getId, userId).set(User::getCourseType, typeList.toString());
+        lambdaUpdateWrapper.eq(User::getId, userId).set(User::getCourseType, course.getTypeList().toString());
         userService.update(null, lambdaUpdateWrapper);
         return Result.success();
     }

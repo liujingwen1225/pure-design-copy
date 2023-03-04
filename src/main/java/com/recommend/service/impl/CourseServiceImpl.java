@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.recommend.controller.dto.ChartDataVo;
 import com.recommend.entity.Course;
 import com.recommend.entity.CourseRecommend;
 import com.recommend.entity.StudentCourse;
@@ -17,11 +18,14 @@ import com.recommend.mapper.StudentCourseMapper;
 import com.recommend.mapper.UserMapper;
 import com.recommend.service.ICourseService;
 import com.recommend.utils.TokenUtils;
+import io.swagger.annotations.ApiModelProperty;
+import org.aspectj.weaver.ast.Var;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -78,15 +82,23 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
     /**
      * 首页课程推荐列表
      *
-     * @param typeList 类型列表
      * @return {@link List}<{@link Course}>
      */
     @Override
-    public List<Course> indexCourse(List<String> typeList) {
+    public List<Course> indexCourse() {
         //不为空是新用户，否则是老用户
         Integer userId = Objects.requireNonNull(TokenUtils.getCurrentUser()).getId();
         List<Course> courseList = new ArrayList<>();
-        if (CollUtil.isNotEmpty(typeList)) {
+        //查询推荐表是否有他数据
+        CourseRecommend courseRecommend = recommendMapper.selectOne(new LambdaQueryWrapper<CourseRecommend>().eq(CourseRecommend::getUserId, userId).last("limit 1"));
+        if (ObjectUtil.isNull(courseRecommend)) {
+            //获取课程类型
+            User user = userMapper.selectById(userId);
+            String courseType = user.getCourseType();
+            //string转list
+            String removeSuffix = StrUtil.strip(courseType, "[", "]");
+            String cleanBlank = StrUtil.cleanBlank(removeSuffix);
+            List<String> typeList = Arrays.asList(cleanBlank.split(","));
             courseList = courseMapper.indexCourse(typeList);
         } else {
             List<CourseRecommend> recommendList = recommendMapper.selectList(new LambdaQueryWrapper<CourseRecommend>().eq(CourseRecommend::getUserId, userId));
@@ -186,6 +198,59 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
         lqw.like(StrUtil.isNotBlank(course.getSchool()), Course::getSchool, course.getSchool());
         lqw.like(StrUtil.isNotBlank(course.getType()), Course::getType, course.getType());
         return lqw;
+    }
+
+    /**
+     * 图表数据
+     *
+     * @return {@link ChartDataVo}
+     */
+    @Override
+    public ChartDataVo chartData() {
+        ChartDataVo chartDataVo = new ChartDataVo();
+        //今年选课用户
+        Long userNumber = courseMapper.userNumber();
+        chartDataVo.setUserNumber(userNumber);
+        //课程数量
+        Long courseNumber = courseMapper.courseNumber();
+        chartDataVo.setCourseNumber(courseNumber);
+        //授课教师数量
+        Long teacherNumber = courseMapper.teacherNumber();
+        chartDataVo.setTeacherNumber(teacherNumber);
+        //授课学校数量
+        Long schoolNumber = courseMapper.schoolNumber();
+        chartDataVo.setSchoolNumber(schoolNumber);
+        //热门课程
+        List<Course> topCourseList = courseMapper.topCourseList();
+        List<String> popularCourseNameList = new ArrayList<>();
+        List<Long> popularCourseNumberList = new ArrayList<>();
+        if (CollUtil.isNotEmpty(topCourseList)) {
+            popularCourseNameList = topCourseList.stream().map(Course::getName).collect(Collectors.toList());
+            popularCourseNumberList = topCourseList.stream().map(Course::getNum).collect(Collectors.toList());
+        }
+        chartDataVo.setPopularCourseNameList(popularCourseNameList);
+        chartDataVo.setPopularCourseNumberList(popularCourseNumberList);
+        //热门学校
+        List<Course> topSchoolList = courseMapper.topSchoolList();
+        List<String> popularSchoolNameList = new ArrayList<>();
+        List<Long> popularSchoolNumberList = new ArrayList<>();
+        if (CollUtil.isNotEmpty(topSchoolList)) {
+            popularSchoolNameList = topSchoolList.stream().map(Course::getSchool).collect(Collectors.toList());
+            popularSchoolNumberList = topSchoolList.stream().map(Course::getNum).collect(Collectors.toList());
+        }
+        chartDataVo.setPopularSchoolNameList(popularSchoolNameList);
+        chartDataVo.setPopularSchoolNumberList(popularSchoolNumberList);
+        //热门老师
+        List<Course> topTeacherList = courseMapper.topTeacherList();
+        List<String> popularTeacherNameList = new ArrayList<>();
+        List<Long> popularTeacherNumberList = new ArrayList<>();
+        if (CollUtil.isNotEmpty(topTeacherList)) {
+            popularTeacherNameList = topTeacherList.stream().map(Course::getInstructor).collect(Collectors.toList());
+            popularTeacherNumberList = topTeacherList.stream().map(Course::getNum).collect(Collectors.toList());
+        }
+        chartDataVo.setPopularTeacherNameList(popularTeacherNameList);
+        chartDataVo.setPopularTeacherNumberList(popularTeacherNumberList);
+        return chartDataVo;
     }
 
 }

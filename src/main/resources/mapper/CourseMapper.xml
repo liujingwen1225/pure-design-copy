@@ -37,4 +37,60 @@
         limit 12
     </select>
 
+    <select id="userNumber" resultType="java.lang.Long">
+        select count(num)
+        from (select count(1) as num
+              from student_course
+              group by student_id) t
+    </select>
+
+    <select id="courseNumber" resultType="java.lang.Long">
+        select count(num)
+        from (select count(1) as num
+              from course c
+              group by c.name) t
+    </select>
+
+    <select id="teacherNumber" resultType="java.lang.Long">
+        select count(num)
+        from (select count(1) as num
+              from course
+              group by instructor) t
+    </select>
+
+    <select id="schoolNumber" resultType="java.lang.Long">
+        select count(num)
+        from (select count(1) as num
+              from course
+              group by school) t
+    </select>
+
+    <select id="topCourseList" resultType="com.recommend.entity.Course">
+        select c.name, c.participants_number as num
+        from course c
+        order by c.participants_number * 1 desc
+        limit 10
+    </select>
+
+    <select id="topSchoolList" resultType="com.recommend.entity.Course">
+        select school, sum(participants_number) as num
+        from (select c.school,
+                     c.participants_number
+              from course c
+              group by c.school, c.participants_number) t
+        group by school
+        order by num desc
+        limit 10
+    </select>
+
+    <select id="topTeacherList" resultType="com.recommend.entity.Course">
+        select instructor, sum(participants_number) as num
+        from (select c.instructor,
+                     c.participants_number
+              from course c
+              group by c.instructor, c.participants_number) t
+        group by instructor
+        order by num desc
+        limit 10
+    </select>
 </mapper>

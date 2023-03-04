@@ -9,10 +9,13 @@ import cn.hutool.json.JSONUtil;
 import com.recommend.common.Constants;
 import com.recommend.common.Result;
 import com.recommend.config.AuthAccess;
+import com.recommend.controller.dto.ChartDataVo;
 import com.recommend.entity.Files;
 import com.recommend.entity.User;
 import com.recommend.mapper.FileMapper;
+import com.recommend.service.ICourseService;
 import com.recommend.service.IUserService;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,6 +40,17 @@ public class EchartsController {
 
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
+
+    @Resource
+    private ICourseService courseService;
+
+    @ApiOperation("图表")
+    @GetMapping("/chartData")
+    public Result chartData() {
+        ChartDataVo chartDataVo = courseService.chartData();
+        return Result.success(chartDataVo);
+    }
+
 
     @GetMapping("/example")
     public Result get() {

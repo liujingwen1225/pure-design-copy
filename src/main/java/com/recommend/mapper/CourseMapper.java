@@ -24,4 +24,17 @@ public interface CourseMapper extends BaseMapper<Course> {
 
     List<Course> indexCourse(List<String> typeList);
 
+    List<Course> topCourseList();
+
+    Long userNumber();
+
+    Long courseNumber();
+
+    Long teacherNumber();
+
+    Long schoolNumber();
+
+    List<Course> topSchoolList();
+
+    List<Course> topTeacherList();
 }

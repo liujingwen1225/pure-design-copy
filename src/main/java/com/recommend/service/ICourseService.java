@@ -2,6 +2,7 @@ package com.recommend.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.recommend.controller.dto.ChartDataVo;
 import com.recommend.entity.Course;
 
 import java.util.List;
@@ -37,10 +38,9 @@ public interface ICourseService extends IService<Course> {
     /**
      * 首页课程推荐列表
      *
-     * @param typeList 类型列表
      * @return {@link List}<{@link Course}>
      */
-    List<Course> indexCourse(List<String> typeList);
+    List<Course> indexCourse();
 
     /**
      * 课程类型列表
@@ -64,4 +64,11 @@ public interface ICourseService extends IService<Course> {
      * @return {@link Integer}
      */
     Integer courseStatus(Integer userId, Integer courseId);
+
+    /**
+     * 图表数据
+     *
+     * @return {@link ChartDataVo}
+     */
+    ChartDataVo chartData();
 }
