@@ -109,7 +109,7 @@ public class Course implements Serializable {
 
     @ApiModelProperty("课程类型数组")
     @TableField(exist = false)
-    private List<String> typeList;
+    private String typeList;
 
     @ApiModelProperty("数量")
     @TableField(exist = false)

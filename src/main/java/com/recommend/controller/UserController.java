@@ -62,6 +62,18 @@ public class UserController {
         return Result.success(userService.register(userDTO));
     }
 
+    //@GetMapping("/create")
+    //public boolean create100() {
+    //    System.out.println("sssssss");
+    //    UserDTO userDTO = new UserDTO();
+    //    for (int i = 0; i < 100; i++) {
+    //        userDTO.setUsername("user_" + (100 + i));
+    //        userDTO.setPassword("123456");
+    //        userService.register(userDTO);
+    //    }
+    //    return true;
+    //}
+
     // 新增或者更新
     @PostMapping
     public Result save(@RequestBody User user) {

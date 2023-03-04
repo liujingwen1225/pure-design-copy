@@ -96,8 +96,7 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
             User user = userMapper.selectById(userId);
             String courseType = user.getCourseType();
             //string转list
-            String removeSuffix = StrUtil.strip(courseType, "[", "]");
-            String cleanBlank = StrUtil.cleanBlank(removeSuffix);
+            String cleanBlank = StrUtil.cleanBlank(courseType);
             List<String> typeList = Arrays.asList(cleanBlank.split(","));
             courseList = courseMapper.indexCourse(typeList);
         } else {
@@ -197,6 +196,7 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
         lqw.like(StrUtil.isNotBlank(course.getName()), Course::getName, course.getName());
         lqw.like(StrUtil.isNotBlank(course.getSchool()), Course::getSchool, course.getSchool());
         lqw.like(StrUtil.isNotBlank(course.getType()), Course::getType, course.getType());
+        lqw.last("order by participants_number * 1 desc, grading * 1 desc");
         return lqw;
     }
 

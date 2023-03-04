@@ -128,7 +128,7 @@ public class CourseController {
         //用户id
         Integer userId = Objects.requireNonNull(TokenUtils.getCurrentUser()).getId();
         LambdaUpdateWrapper<User> lambdaUpdateWrapper = new LambdaUpdateWrapper<>();
-        lambdaUpdateWrapper.eq(User::getId, userId).set(User::getCourseType, course.getTypeList().toString());
+        lambdaUpdateWrapper.eq(User::getId, userId).set(User::getCourseType, course.getTypeList());
         userService.update(null, lambdaUpdateWrapper);
         return Result.success();
     }

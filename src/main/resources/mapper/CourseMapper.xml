@@ -45,10 +45,7 @@
     </select>
 
     <select id="courseNumber" resultType="java.lang.Long">
-        select count(num)
-        from (select count(1) as num
-              from course c
-              group by c.name) t
+        select count(1) from course
     </select>
 
     <select id="teacherNumber" resultType="java.lang.Long">

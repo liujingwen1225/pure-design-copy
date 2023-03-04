@@ -71,15 +71,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             // 设置用户的菜单列表
             List<Menu> roleMenus = getRoleMenus(role);
             userDTO.setMenus(roleMenus);
-            //用户类型：【1=新用户，2=老用户】
-            int userType = 2;
-            if (!StrUtil.equals(role, "ROLE_ADMIN")) {
-                String courseType = one.getCourseType();
-                if (StrUtil.isBlank(courseType)) {
-                    userType = 1;
-                }
-            }
-            userDTO.setUserType(userType);
             return userDTO;
         } else {
             throw new ServiceException(Constants.CODE_600, "用户名或密码错误");
