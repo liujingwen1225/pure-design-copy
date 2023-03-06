@@ -28,12 +28,15 @@
         select *
         from course c
         <where>
+        1=1
+            and
             <if test="typeList != null">
                 <foreach collection="typeList" item="id" open="c.type in (" separator="," close=")">
                     #{id}
                 </foreach>
             </if>
             <if test="courseIds != null">
+            and
                 <foreach collection="courseIds" item="id" open="c.id not in (" separator="," close=")">
                     #{id}
                 </foreach>

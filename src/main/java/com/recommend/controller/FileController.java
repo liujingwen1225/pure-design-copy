@@ -5,7 +5,6 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.recommend.common.Constants;
 import com.recommend.common.Result;
 import com.recommend.entity.Files;
@@ -86,7 +85,6 @@ public class FileController {
             url = accessPath + fileUUID;
         }
 
-
         // 存储数据库
         Files saveFile = new Files();
         saveFile.setName(originalFilename);
@@ -94,22 +92,6 @@ public class FileController {
         saveFile.setSize(size / 1024); // 单位 kb
         saveFile.setUrl(url);
         saveFile.setMd5(md5);
-//        fileMapper.insert(saveFile);
-
-        // 从redis取出数据，操作完，再设置（不用查询数据库）
-//        String json = stringRedisTemplate.opsForValue().get(Constants.FILES_KEY);
-//        List<Files> files1 = JSONUtil.toBean(json, new TypeReference<List<Files>>() {
-//        }, true);
-//        files1.add(saveFile);
-//        setCache(Constants.FILES_KEY, JSONUtil.toJsonStr(files1));
-
-
-        // 从数据库查出数据
-//        List<Files> files = fileMapper.selectList(null);
-//        // 设置最新的缓存
-//        setCache(Constants.FILES_KEY, JSONUtil.toJsonStr(files));
-
-        // 最简单的方式：直接清空缓存
         flushRedis(Constants.FILES_KEY);
 
         return url;
@@ -159,64 +141,6 @@ public class FileController {
         flushRedis(Constants.FILES_KEY);
         return Result.success();
     }
-
-    @GetMapping("/detail/{id}")
-    public Result getById(@PathVariable Integer id) {
-        return Result.success(fileMapper.selectById(id));
-    }
-
-    //清除一条缓存，key为要清空的数据
-//    @CacheEvict(value="files",key="'frontAll'")
-    @DeleteMapping("/{id}")
-    public Result delete(@PathVariable Integer id) {
-        Files files = fileMapper.selectById(id);
-        files.setIsDelete(true);
-        fileMapper.updateById(files);
-        flushRedis(Constants.FILES_KEY);
-        return Result.success();
-    }
-
-    @PostMapping("/del/batch")
-    public Result deleteBatch(@RequestBody List<Integer> ids) {
-        // select * from sys_file where id in (id,id,id...)
-        QueryWrapper<Files> queryWrapper = new QueryWrapper<>();
-        queryWrapper.in("id", ids);
-        List<Files> files = fileMapper.selectList(queryWrapper);
-        for (Files file : files) {
-            file.setIsDelete(true);
-            fileMapper.updateById(file);
-        }
-        return Result.success();
-    }
-
-    /**
-     * 分页查询接口
-     *
-     * @param pageNum
-     * @param pageSize
-     * @param name
-     * @return
-     */
-    @GetMapping("/page")
-    public Result findPage(@RequestParam Integer pageNum,
-                           @RequestParam Integer pageSize,
-                           @RequestParam(defaultValue = "") String name) {
-
-        QueryWrapper<Files> queryWrapper = new QueryWrapper<>();
-        // 查询未删除的记录
-        queryWrapper.eq("is_delete", false);
-        queryWrapper.orderByDesc("id");
-        if (!"".equals(name)) {
-            queryWrapper.like("name", name);
-        }
-        return Result.success(fileMapper.selectPage(new Page<>(pageNum, pageSize), queryWrapper));
-    }
-
-    // 设置缓存
-    private void setCache(String key, String value) {
-        stringRedisTemplate.opsForValue().set(key, value);
-    }
-
     // 删除缓存
     private void flushRedis(String key) {
         stringRedisTemplate.delete(key);

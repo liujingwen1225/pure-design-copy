@@ -52,8 +52,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     @Resource
     private IMenuService menuService;
 
-    @Resource
-    private IStudentCourseService studentCourseService;
 
     @Override
     public UserDTO login(UserDTO userDTO) {
