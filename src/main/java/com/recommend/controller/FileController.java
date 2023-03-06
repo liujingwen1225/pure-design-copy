@@ -31,18 +31,23 @@ import java.util.List;
 @RequestMapping("/file")
 public class FileController {
 
-    @Value("${files.upload.path}")
-    private String fileUploadPath;
+    /**
+     * 上传路径
+     */
+    @Value("${file.uploadPath}")
+    private String uploadPath;
 
-    @Value("${server.ip}")
-    private String serverIp;
+    /**
+     * 访问路径
+     */
+    @Value("${file.accessPath}")
+    private String accessPath;
 
     @Resource
     private FileMapper fileMapper;
 
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
-
 
     /**
      * 文件上传接口
@@ -60,7 +65,7 @@ public class FileController {
         // 定义一个文件唯一的标识码
         String fileUUID = IdUtil.fastSimpleUUID() + StrUtil.DOT + type;
 
-        File uploadFile = new File(fileUploadPath + fileUUID);
+        File uploadFile = new File(uploadPath + fileUUID);
         // 判断配置的文件目录是否存在，若不存在则创建一个新的文件目录
         File parentFile = uploadFile.getParentFile();
         if (!parentFile.exists()) {
@@ -78,7 +83,7 @@ public class FileController {
             // 上传文件到磁盘
             file.transferTo(uploadFile);
             // 数据库若不存在重复文件，则不删除刚才上传的文件
-            url = "http://" + serverIp + ":9090/file/" + fileUUID;
+            url = accessPath + fileUUID;
         }
 
 
@@ -120,7 +125,7 @@ public class FileController {
     @GetMapping("/{fileUUID}")
     public void download(@PathVariable String fileUUID, HttpServletResponse response) throws IOException {
         // 根据文件的唯一标识码获取文件
-        File uploadFile = new File(fileUploadPath + fileUUID);
+        File uploadFile = new File(uploadPath + fileUUID);
         // 设置输出流的格式
         ServletOutputStream os = response.getOutputStream();
         response.addHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(fileUUID, "UTF-8"));

@@ -6,12 +6,12 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.recommend.common.Result;
 import com.recommend.controller.dto.PageQuery;
 import com.recommend.entity.Course;
+import com.recommend.entity.StudentCourse;
 import com.recommend.entity.User;
 import com.recommend.service.ICourseService;
+import com.recommend.service.IStudentCourseService;
 import com.recommend.service.IUserService;
 import com.recommend.utils.TokenUtils;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,9 +31,10 @@ public class CourseController {
 
     @Resource
     private ICourseService courseService;
-
     @Resource
     private IUserService userService;
+    @Resource
+    private IStudentCourseService studentCourseService;
 
     // 新增或者更新
     @PostMapping
@@ -132,6 +133,18 @@ public class CourseController {
         userService.update(null, lambdaUpdateWrapper);
         return Result.success();
     }
+
+    @ApiOperation("我的评分")
+    @PostMapping("/myRating")
+    public Result myRating(@RequestBody StudentCourse bo) {
+        //用户id
+        Integer userId = Objects.requireNonNull(TokenUtils.getCurrentUser()).getId();
+        LambdaUpdateWrapper<StudentCourse> lambdaUpdateWrapper = new LambdaUpdateWrapper<>();
+        lambdaUpdateWrapper.eq(StudentCourse::getStudentId, userId).eq(StudentCourse::getCourseId, bo.getCourseId()).set(StudentCourse::getRating, bo.getRating());
+        studentCourseService.update(null, lambdaUpdateWrapper);
+        return Result.success();
+    }
+
 
     @PostMapping("/update")
     public Result update(@RequestBody Course course) {

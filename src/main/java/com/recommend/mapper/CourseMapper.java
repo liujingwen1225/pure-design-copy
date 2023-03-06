@@ -11,8 +11,6 @@ import java.util.List;
  * <p>
  * Mapper 接口
  * </p>
- *
- * 
  */
 public interface CourseMapper extends BaseMapper<Course> {
 
@@ -22,9 +20,9 @@ public interface CourseMapper extends BaseMapper<Course> {
 
     void setStudentCourse(@Param("courseId") Integer courseId, @Param("studentId") Integer studentId);
 
-    List<Course> indexCourse(List<String> typeList);
+    List<Course> indexCourse(@Param("typeList") List<String> typeList, @Param("courseIds") List<Integer> courseIds);
 
-    List<Course> topCourseList();
+    List<Course> topCourseList(List<String> typeList);
 
     Long userNumber();
 
@@ -34,7 +32,7 @@ public interface CourseMapper extends BaseMapper<Course> {
 
     Long schoolNumber();
 
-    List<Course> topSchoolList();
+    List<Course> topSchoolList(List<String> typeList);
 
-    List<Course> topTeacherList();
+    List<Course> topTeacherList(List<String> typeList);
 }

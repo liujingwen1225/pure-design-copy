@@ -19,7 +19,6 @@ import com.recommend.mapper.UserMapper;
 import com.recommend.service.ICourseService;
 import com.recommend.utils.TokenUtils;
 import io.swagger.annotations.ApiModelProperty;
-import org.aspectj.weaver.ast.Var;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -89,21 +88,29 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
         //不为空是新用户，否则是老用户
         Integer userId = Objects.requireNonNull(TokenUtils.getCurrentUser()).getId();
         List<Course> courseList = new ArrayList<>();
+        //过滤已选课的数据
+        List<Integer> courseIds = null;
+        List<StudentCourse> studentCourseList = studentCourseMapper.selectList(new LambdaQueryWrapper<StudentCourse>().eq(StudentCourse::getStudentId, userId));
+        if (CollUtil.isNotEmpty(studentCourseList)) {
+            courseIds = studentCourseList.stream().map(StudentCourse::getCourseId).collect(Collectors.toList());
+        }
         //查询推荐表是否有他数据
         CourseRecommend courseRecommend = recommendMapper.selectOne(new LambdaQueryWrapper<CourseRecommend>().eq(CourseRecommend::getUserId, userId).last("limit 1"));
         if (ObjectUtil.isNull(courseRecommend)) {
             //获取课程类型
             User user = userMapper.selectById(userId);
             String courseType = user.getCourseType();
-            //string转list
-            String cleanBlank = StrUtil.cleanBlank(courseType);
-            List<String> typeList = Arrays.asList(cleanBlank.split(","));
-            courseList = courseMapper.indexCourse(typeList);
+            if (StrUtil.isNotBlank(courseType)) {
+                //string转list
+                String cleanBlank = StrUtil.cleanBlank(courseType);
+                List<String> typeList = Arrays.asList(cleanBlank.split(","));
+                courseList = courseMapper.indexCourse(typeList, courseIds);
+            }
         } else {
             List<CourseRecommend> recommendList = recommendMapper.selectList(new LambdaQueryWrapper<CourseRecommend>().eq(CourseRecommend::getUserId, userId));
             if (CollUtil.isNotEmpty(recommendList)) {
                 List<Integer> collect = recommendList.stream().map(CourseRecommend::getCourseId).collect(Collectors.toList());
-                courseList = courseMapper.selectList(new LambdaQueryWrapper<Course>().in(Course::getId, collect));
+                courseList = courseMapper.selectList(new LambdaQueryWrapper<Course>().in(Course::getId, collect).notIn(CollUtil.isNotEmpty(courseIds), Course::getId, courseIds));
             }
         }
         //选课状态：【1=未选，2=已选】
@@ -185,6 +192,25 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
             //条件查询
             LambdaQueryWrapper<Course> lqw = buildQueryWrapper(course);
             coursePage = courseMapper.selectPage(page, lqw);
+            //
+            List<Course> records = coursePage.getRecords();
+            for (Course record : records) {
+                //
+                Integer id = record.getId();
+                //我的评分
+                String rating = "";
+                Integer myRatingType = 1;
+                StudentCourse studentCourse = studentCourseMapper.selectOne(new LambdaQueryWrapper<StudentCourse>().eq(StudentCourse::getStudentId, userId).eq(StudentCourse::getCourseId, id).last("limit 1"));
+                if (ObjectUtil.isNotNull(studentCourse)) {
+                    String rating1 = studentCourse.getRating();
+                    if (StrUtil.isNotBlank(rating1)) {
+                        rating = rating1;
+                        myRatingType = 2;
+                    }
+                }
+                record.setRating(rating);
+                record.setMyRatingType(myRatingType);
+            }
         }
         return coursePage;
     }
@@ -206,7 +232,7 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
      * @return {@link ChartDataVo}
      */
     @Override
-    public ChartDataVo chartData() {
+    public ChartDataVo chartData(Course course) {
         ChartDataVo chartDataVo = new ChartDataVo();
         //今年选课用户
         Long userNumber = courseMapper.userNumber();
@@ -220,8 +246,16 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
         //授课学校数量
         Long schoolNumber = courseMapper.schoolNumber();
         chartDataVo.setSchoolNumber(schoolNumber);
+        //
+        String courseType = course.getTypeList();
+        List<String> typeList = null;
+        if (StrUtil.isNotBlank(courseType)) {
+            //string转list
+            String cleanBlank = StrUtil.cleanBlank(courseType);
+            typeList = Arrays.asList(cleanBlank.split(","));
+        }
         //热门课程
-        List<Course> topCourseList = courseMapper.topCourseList();
+        List<Course> topCourseList = courseMapper.topCourseList(typeList);
         List<String> popularCourseNameList = new ArrayList<>();
         List<Long> popularCourseNumberList = new ArrayList<>();
         if (CollUtil.isNotEmpty(topCourseList)) {
@@ -231,7 +265,7 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
         chartDataVo.setPopularCourseNameList(popularCourseNameList);
         chartDataVo.setPopularCourseNumberList(popularCourseNumberList);
         //热门学校
-        List<Course> topSchoolList = courseMapper.topSchoolList();
+        List<Course> topSchoolList = courseMapper.topSchoolList(typeList);
         List<String> popularSchoolNameList = new ArrayList<>();
         List<Long> popularSchoolNumberList = new ArrayList<>();
         if (CollUtil.isNotEmpty(topSchoolList)) {
@@ -241,7 +275,7 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
         chartDataVo.setPopularSchoolNameList(popularSchoolNameList);
         chartDataVo.setPopularSchoolNumberList(popularSchoolNumberList);
         //热门老师
-        List<Course> topTeacherList = courseMapper.topTeacherList();
+        List<Course> topTeacherList = courseMapper.topTeacherList(typeList);
         List<String> popularTeacherNameList = new ArrayList<>();
         List<Long> popularTeacherNumberList = new ArrayList<>();
         if (CollUtil.isNotEmpty(topTeacherList)) {

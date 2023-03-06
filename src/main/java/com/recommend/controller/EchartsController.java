@@ -10,6 +10,7 @@ import com.recommend.common.Constants;
 import com.recommend.common.Result;
 import com.recommend.config.AuthAccess;
 import com.recommend.controller.dto.ChartDataVo;
+import com.recommend.entity.Course;
 import com.recommend.entity.Files;
 import com.recommend.entity.User;
 import com.recommend.mapper.FileMapper;
@@ -46,8 +47,8 @@ public class EchartsController {
 
     @ApiOperation("图表")
     @GetMapping("/chartData")
-    public Result chartData() {
-        ChartDataVo chartDataVo = courseService.chartData();
+    public Result chartData(Course course) {
+        ChartDataVo chartDataVo = courseService.chartData(course);
         return Result.success(chartDataVo);
     }
 

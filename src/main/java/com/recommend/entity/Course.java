@@ -118,4 +118,13 @@ public class Course implements Serializable {
     @ApiModelProperty("数量")
     @TableField(exist = false)
     private Long num;
+
+    @ApiModelProperty("我的评分")
+    @TableField(exist = false)
+    private String rating;
+
+    @ApiModelProperty("我的评分类型：【1=未评，2=已评】")
+    @TableField(exist = false)
+    private Integer myRatingType;
+
 }

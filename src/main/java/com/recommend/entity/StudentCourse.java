@@ -31,5 +31,8 @@ public class StudentCourse implements Serializable {
     @ApiModelProperty("课程id")
     private Integer courseId;
 
+    @ApiModelProperty("评分")
+    private String rating;
+
 
 }
