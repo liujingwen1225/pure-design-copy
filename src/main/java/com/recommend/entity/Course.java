@@ -92,7 +92,11 @@ public class Course implements Serializable {
      */
     @ApiModelProperty("课程评分")
     private String grading;
-
+    /**
+     * 课程概述
+     */
+    @ApiModelProperty("课程概述")
+    private String overview;
     /**
      * 封面图
      */
