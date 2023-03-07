@@ -3,6 +3,7 @@ package com.recommend.entity;
 import com.baomidou.mybatisplus.annotation.TableName;
 
 import java.io.Serializable;
+import java.util.Date;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -33,6 +34,9 @@ public class StudentCourse implements Serializable {
 
     @ApiModelProperty("评分")
     private String rating;
+
+    @ApiModelProperty("时间")
+    private Date createTime;
 
 
 }

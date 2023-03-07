@@ -18,15 +18,11 @@ import com.recommend.mapper.StudentCourseMapper;
 import com.recommend.mapper.UserMapper;
 import com.recommend.service.ICourseService;
 import com.recommend.utils.TokenUtils;
-import io.swagger.annotations.ApiModelProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -185,14 +181,26 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
         //获取用户id
         Integer userId = Objects.requireNonNull(TokenUtils.getCurrentUser()).getId();
         //我的课程数据
-        List<StudentCourse> selectList = studentCourseMapper.selectList(new LambdaQueryWrapper<StudentCourse>().eq(StudentCourse::getStudentId, userId));
+        List<StudentCourse> selectList = studentCourseMapper.selectList(new LambdaQueryWrapper<StudentCourse>().eq(StudentCourse::getStudentId, userId).orderByDesc(StudentCourse::getCreateTime));
         if (CollUtil.isNotEmpty(selectList)) {
             List<Integer> collect = selectList.stream().map(StudentCourse::getCourseId).collect(Collectors.toList());
-            course.setCourseIds(collect);
+            List<Integer> collectid = new ArrayList<>();
+            long max = (page.getCurrent() * page.getSize() - page.getSize()) + 12;
+            if (max > collect.size()) {
+                max = (page.getCurrent() * page.getSize() - page.getSize()) + collect.size() % 12;
+            }
+            for (int i = (int) (page.getCurrent() * page.getSize() - page.getSize()); i < max; i++) {
+                collectid.add(collect.get(i));
+            }
+            course.setCourseIds(collectid);
             //条件查询
             LambdaQueryWrapper<Course> lqw = buildQueryWrapper(course);
+            long current = page.getCurrent();
+            page.setCurrent(1);
             coursePage = courseMapper.selectPage(page, lqw);
+            setListOrder(collect, coursePage.getRecords());
             //
+            coursePage.setCurrent(current);
             List<Course> records = coursePage.getRecords();
             for (Course record : records) {
                 //
@@ -212,7 +220,24 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
                 record.setMyRatingType(myRatingType);
             }
         }
+        coursePage.setTotal(selectList.size());
         return coursePage;
+    }
+
+    public static void setListOrder(List<Integer> orderRegulation, List<Course> targetList) {
+        // 按照 list 里的 name 来排序 targetList
+        Collections.sort(targetList, ((o1, o2) -> {
+            int io1 = orderRegulation.indexOf(o1.getId());
+            int io2 = orderRegulation.indexOf(o2.getId());
+
+            if (io1 != -1) {
+                io1 = targetList.size() - io1;
+            }
+            if (io2 != -1) {
+                io2 = targetList.size() - io2;
+            }
+            return io2 - io1;
+        }));
     }
 
     private LambdaQueryWrapper<Course> buildQueryWrapper(Course course) {
