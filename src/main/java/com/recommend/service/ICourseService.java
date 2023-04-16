@@ -71,4 +71,6 @@ public interface ICourseService extends IService<Course> {
      * @return {@link ChartDataVo}
      */
     ChartDataVo chartData(Course course);
+
+    ChartDataVo chartData2(Integer course);
 }

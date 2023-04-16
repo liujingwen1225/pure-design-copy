@@ -72,9 +72,9 @@
               group by school) t
     </select>
 
-    <select id="topCourseList" resultType="com.recommend.entity.Course">
-        select c.name, c.participants_number as num
-        from course c
+    <select id="topCourseList" resultType="com.recommend.entity.analysis.HotAnalysis">
+        select *
+        from hot_analysis c
         <where>
             <if test="typeList != null">
                 <foreach collection="typeList" item="id" open="c.type in (" separator="," close=")">
@@ -82,33 +82,43 @@
                 </foreach>
             </if>
         </where>
-        order by c.participants_number * 1 desc
+        order by name_num desc
         limit 10
     </select>
 
-    <select id="topSchoolList" resultType="com.recommend.entity.Course">
-        select school, sum(participants_number) as num
-        from (select c.school,
-        c.participants_number
-        from course c
-        <where>
-            <if test="typeList != null">
-                <foreach collection="typeList" item="id" open="c.type in (" separator="," close=")">
-                    #{id}
-                </foreach>
-            </if>
-        </where>
-        group by c.school, c.participants_number) t
+    <select id="topSchoolList" resultType="com.recommend.entity.analysis.HotAnalysis">
+        select school,sum(school_num) as school_num
+        from hot_analysis
         group by school
-        order by num desc
+        order by school_num desc
         limit 10
     </select>
 
-    <select id="topTeacherList" resultType="com.recommend.entity.Course">
-        select instructor, sum(participants_number) as num
-        from (select c.instructor,
-        c.participants_number
-        from course c
+    <select id="totalAnalysis" resultType="com.recommend.entity.analysis.TotalAnalysis">
+        select * from total_analysis limit 1
+    </select>
+    <select id="totalAnalysis2" resultType="com.recommend.entity.analysis.TotalAnalysis2">
+        select * from total_analysis2
+    </select>
+    <select id="topNameList" resultType="com.recommend.entity.analysis.HotAnalysis">
+        select name ,sum(name_num) as name_num from hot_analysis group by name order by name_num desc limit 50
+    </select>
+    <select id="hotCourseZb" resultType="com.recommend.entity.analysis.ChartModel">
+        select school as name ,sum(school_cnt) as value
+        from school_cnt_analysis c
+        <where>
+            <if test="typeList != null">
+                <foreach collection="typeList" item="id" open="c.school in (" separator="," close=")">
+                    #{id}
+                </foreach>
+            </if>
+        </where>
+        group by school
+        order by value desc
+    </select>
+    <select id="hotTypeZb" resultType="com.recommend.entity.analysis.ChartModel">
+        select type as name ,sum(type_cnt) as value
+        from type_cnt_analysis c
         <where>
             <if test="typeList != null">
                 <foreach collection="typeList" item="id" open="c.type in (" separator="," close=")">
@@ -116,9 +126,13 @@
                 </foreach>
             </if>
         </where>
-        group by c.instructor, c.participants_number) t
-        group by instructor
-        order by num desc
-        limit 10
+        group by type
+        order by value desc limit 10
+    </select>
+    <select id="yearData" resultType="com.recommend.entity.analysis.YearMonthAnalysis">
+        select year+'-'+ymonth ,name,name_pns ,instructor ,instructor_pns ,school ,school_pns
+        from year_month_analysis c
+        where year+ymonth &lt; year(now())+month(now())
+        order by year desc, ymonth desc limit 12
     </select>
 </mapper>

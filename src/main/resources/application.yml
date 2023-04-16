@@ -46,6 +46,8 @@ tlog:
 # 文件
 file:
   #文件上传路径
-  uploadPath: D:\nginx-1.20.2\html\pic\
+#  uploadPath: D:\nginx-1.20.2\html\pic\
+  uploadPath: /root/recommend/fe/html/pic/
   #文件访问路径
-  accessPath: http://127.0.0.1:1966/pic/
+#  accessPath: http://127.0.0.1:1966/pic/
+  accessPath: http://43.136.26.67:18080/pic/

@@ -3,6 +3,7 @@ package com.recommend.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.recommend.entity.Course;
+import com.recommend.entity.analysis.*;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -22,17 +23,21 @@ public interface CourseMapper extends BaseMapper<Course> {
 
     List<Course> indexCourse(@Param("typeList") List<String> typeList, @Param("courseIds") List<Integer> courseIds);
 
-    List<Course> topCourseList(List<String> typeList);
+    List<HotAnalysis> topNameList();
 
-    Long userNumber();
+    List<HotAnalysis> topCourseList(List<String> typeList);
 
-    Long courseNumber();
+    TotalAnalysis totalAnalysis();
 
-    Long teacherNumber();
+    List<TotalAnalysis2> totalAnalysis2();
 
-    Long schoolNumber();
 
-    List<Course> topSchoolList(List<String> typeList);
+    List<HotAnalysis> topSchoolList(List<String> typeList);
 
-    List<Course> topTeacherList(List<String> typeList);
+
+    List<ChartModel> hotCourseZb(List<String> typeList);
+
+    List<ChartModel> hotTypeZb(List<String> typeList);
+
+    List<YearMonthAnalysis> yearData();
 }

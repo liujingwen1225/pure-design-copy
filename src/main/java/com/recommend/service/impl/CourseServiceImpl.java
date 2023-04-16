@@ -12,6 +12,7 @@ import com.recommend.entity.Course;
 import com.recommend.entity.CourseRecommend;
 import com.recommend.entity.StudentCourse;
 import com.recommend.entity.User;
+import com.recommend.entity.analysis.*;
 import com.recommend.mapper.CourseMapper;
 import com.recommend.mapper.CourseRecommendMapper;
 import com.recommend.mapper.StudentCourseMapper;
@@ -260,17 +261,37 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
     public ChartDataVo chartData(Course course) {
         ChartDataVo chartDataVo = new ChartDataVo();
         //今年选课用户
-        Long userNumber = courseMapper.userNumber();
-        chartDataVo.setUserNumber(userNumber);
+        TotalAnalysis totalAnalysis = courseMapper.totalAnalysis();
+        chartDataVo.setUserNumber(totalAnalysis.getStudentCnt());
         //课程数量
-        Long courseNumber = courseMapper.courseNumber();
-        chartDataVo.setCourseNumber(courseNumber);
+        chartDataVo.setCourseNumber(totalAnalysis.getNameCnt());
         //授课教师数量
-        Long teacherNumber = courseMapper.teacherNumber();
-        chartDataVo.setTeacherNumber(teacherNumber);
+        chartDataVo.setTeacherNumber(totalAnalysis.getInstructorCnt());
         //授课学校数量
-        Long schoolNumber = courseMapper.schoolNumber();
-        chartDataVo.setSchoolNumber(schoolNumber);
+        chartDataVo.setSchoolNumber(totalAnalysis.getSchoolCnt());
+        List<TotalAnalysis2> totalAnalysis2s = courseMapper.totalAnalysis2();
+
+        for (TotalAnalysis2 totalAnalysis2 : totalAnalysis2s) {
+            switch (totalAnalysis2.getLabels()) {
+                case "课程进行中":
+                    chartDataVo.setStartCourse(totalAnalysis2.getCnt());
+                    break;
+                case "课程已结束":
+                    chartDataVo.setEndCourse(totalAnalysis2.getCnt());
+                    break;
+                case "课程即将开始":
+                    chartDataVo.setNotStartCourse(totalAnalysis2.getCnt());
+                    break;
+                case "国家精品":
+                    chartDataVo.setBoutiqueCourses(totalAnalysis2.getCnt());
+                    break;
+                case "大学先修课":
+                    chartDataVo.setPurerCourses(totalAnalysis2.getCnt());
+                    break;
+                default:
+                    break;
+            }
+        }
         //
         String courseType = course.getTypeList();
         List<String> typeList = null;
@@ -279,37 +300,71 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
             String cleanBlank = StrUtil.cleanBlank(courseType);
             typeList = Arrays.asList(cleanBlank.split(","));
         }
+
         //热门课程
-        List<Course> topCourseList = courseMapper.topCourseList(typeList);
+        List<HotAnalysis> hotAnalyses = courseMapper.topCourseList(typeList);
         List<String> popularCourseNameList = new ArrayList<>();
         List<Long> popularCourseNumberList = new ArrayList<>();
-        if (CollUtil.isNotEmpty(topCourseList)) {
-            popularCourseNameList = topCourseList.stream().map(Course::getName).collect(Collectors.toList());
-            popularCourseNumberList = topCourseList.stream().map(Course::getNum).collect(Collectors.toList());
+        //热门老师
+        List<String> popularTeacherNameList = new ArrayList<>();
+        List<Long> popularTeacherNumberList = new ArrayList<>();
+        //热门学校
+        List<String> popularSchoolNameList = new ArrayList<>();
+        List<Long> popularSchoolNumberList = new ArrayList<>();
+        if (CollUtil.isNotEmpty(hotAnalyses)) {
+            popularCourseNameList = hotAnalyses.stream().map(HotAnalysis::getName).collect(Collectors.toList());
+            popularCourseNumberList = hotAnalyses.stream().map(HotAnalysis::getNameNum).collect(Collectors.toList());
+            popularSchoolNameList = hotAnalyses.stream().map(HotAnalysis::getSchool).collect(Collectors.toList());
+            popularSchoolNumberList = hotAnalyses.stream().map(HotAnalysis::getSchoolNum).collect(Collectors.toList());
+            popularTeacherNameList = hotAnalyses.stream().map(HotAnalysis::getInstructor).collect(Collectors.toList());
+            popularTeacherNumberList = hotAnalyses.stream().map(HotAnalysis::getInstructorNum).collect(Collectors.toList());
+        }
+        List<HotAnalysis> hotAnalyses1 = courseMapper.topNameList();
+        List<Map<String, Object>> words = new ArrayList<>();
+        for (HotAnalysis hotAnalysis : hotAnalyses1) {
+            Map<String, Object> word = new HashMap<>();
+            word.put("name", hotAnalysis.getName());
+            word.put("value", hotAnalysis.getNameNum());
+            words.add(word);
+        }
+        chartDataVo.setWordCould(words);
+        if (StrUtil.isBlank(courseType)) {
+            List<HotAnalysis> hotAnalyses2 = courseMapper.topSchoolList(typeList);
+            popularSchoolNameList = hotAnalyses2.stream().map(HotAnalysis::getSchool).collect(Collectors.toList());
+            popularSchoolNumberList = hotAnalyses2.stream().map(HotAnalysis::getSchoolNum).collect(Collectors.toList());
         }
         chartDataVo.setPopularCourseNameList(popularCourseNameList);
         chartDataVo.setPopularCourseNumberList(popularCourseNumberList);
-        //热门学校
-        List<Course> topSchoolList = courseMapper.topSchoolList(typeList);
+        chartDataVo.setPopularSchoolNameList(popularSchoolNameList);
+        chartDataVo.setPopularSchoolNumberList(popularSchoolNumberList);
+        chartDataVo.setPopularTeacherNameList(popularTeacherNameList);
+        chartDataVo.setPopularTeacherNumberList(popularTeacherNumberList);
+        // 热门课程发布课程占比
+        List<ChartModel> chartModels = courseMapper.hotCourseZb(popularSchoolNameList);
+        chartDataVo.setHotSchoolZb(chartModels);
+        // 热门类型课程占比
+        List<ChartModel> chartModels2 = courseMapper.hotTypeZb(typeList);
+        chartDataVo.setHotTypeZb(chartModels2);
+
+        return chartDataVo;
+    }
+    /**
+     * 图表数据
+     *
+     * @return {@link ChartDataVo}
+     */
+    @Override
+    public ChartDataVo chartData2(Integer course) {
+        ChartDataVo chartDataVo = new ChartDataVo();
+        List<YearMonthAnalysis> yearDatas =  courseMapper.yearData();
         List<String> popularSchoolNameList = new ArrayList<>();
         List<Long> popularSchoolNumberList = new ArrayList<>();
-        if (CollUtil.isNotEmpty(topSchoolList)) {
-            popularSchoolNameList = topSchoolList.stream().map(Course::getSchool).collect(Collectors.toList());
-            popularSchoolNumberList = topSchoolList.stream().map(Course::getNum).collect(Collectors.toList());
+        if (course==1){
+            popularSchoolNameList = yearDatas.stream().map(YearMonthAnalysis::getSchool).collect(Collectors.toList());
+            popularSchoolNumberList = yearDatas.stream().map(YearMonthAnalysis::getSchoolPns).collect(Collectors.toList());
         }
         chartDataVo.setPopularSchoolNameList(popularSchoolNameList);
         chartDataVo.setPopularSchoolNumberList(popularSchoolNumberList);
-        //热门老师
-        List<Course> topTeacherList = courseMapper.topTeacherList(typeList);
-        List<String> popularTeacherNameList = new ArrayList<>();
-        List<Long> popularTeacherNumberList = new ArrayList<>();
-        if (CollUtil.isNotEmpty(topTeacherList)) {
-            popularTeacherNameList = topTeacherList.stream().map(Course::getInstructor).collect(Collectors.toList());
-            popularTeacherNumberList = topTeacherList.stream().map(Course::getNum).collect(Collectors.toList());
-        }
-        chartDataVo.setPopularTeacherNameList(popularTeacherNameList);
-        chartDataVo.setPopularTeacherNumberList(popularTeacherNumberList);
         return chartDataVo;
     }
-
 }
