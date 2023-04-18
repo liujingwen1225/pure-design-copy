@@ -130,9 +130,16 @@
         order by value desc limit 10
     </select>
     <select id="yearData" resultType="com.recommend.entity.analysis.YearMonthAnalysis">
-        select year+'-'+ymonth ,name,name_pns ,instructor ,instructor_pns ,school ,school_pns
+        select year,ymonth ,name,name_pns ,instructor ,instructor_pns ,school ,school_pns
         from year_month_analysis c
-        where year+ymonth &lt; year(now())+month(now())
-        order by year desc, ymonth desc limit 12
+        <where>
+            <if test="year != null and year != ''">
+                and year = #{year}
+            </if>
+            <if test="month != null and month != ''">
+                and ymonth = #{month}
+            </if>
+        </where>
+        order by year desc, ymonth desc limit 10
     </select>
 </mapper>

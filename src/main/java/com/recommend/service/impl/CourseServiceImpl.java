@@ -348,20 +348,27 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
 
         return chartDataVo;
     }
+
     /**
      * 图表数据
      *
      * @return {@link ChartDataVo}
      */
     @Override
-    public ChartDataVo chartData2(Integer course) {
+    public ChartDataVo chartData2(Integer course, Integer year, Integer month) {
         ChartDataVo chartDataVo = new ChartDataVo();
-        List<YearMonthAnalysis> yearDatas =  courseMapper.yearData();
+        List<YearMonthAnalysis> yearDatas = courseMapper.yearData(year, month);
         List<String> popularSchoolNameList = new ArrayList<>();
         List<Long> popularSchoolNumberList = new ArrayList<>();
-        if (course==1){
+        if (course == 1) {
+            popularSchoolNameList = yearDatas.stream().map(YearMonthAnalysis::getInstructor).collect(Collectors.toList());
+            popularSchoolNumberList = yearDatas.stream().map(YearMonthAnalysis::getInstructorPns).collect(Collectors.toList());
+        } else if (course == 2) {
             popularSchoolNameList = yearDatas.stream().map(YearMonthAnalysis::getSchool).collect(Collectors.toList());
             popularSchoolNumberList = yearDatas.stream().map(YearMonthAnalysis::getSchoolPns).collect(Collectors.toList());
+        } else if (course == 3) {
+            popularSchoolNameList = yearDatas.stream().map(YearMonthAnalysis::getName).collect(Collectors.toList());
+            popularSchoolNumberList = yearDatas.stream().map(YearMonthAnalysis::getNamePns).collect(Collectors.toList());
         }
         chartDataVo.setPopularSchoolNameList(popularSchoolNameList);
         chartDataVo.setPopularSchoolNumberList(popularSchoolNumberList);

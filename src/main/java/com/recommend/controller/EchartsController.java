@@ -28,11 +28,17 @@ public class EchartsController {
 
     @ApiOperation("图表")
     @GetMapping("/chartYearData")
-    public Result chartYearData(Integer course) {
-        if (ObjectUtil.isNull(course)){
-            course = 1;
+    public Result chartYearData(Integer type, Integer year, Integer month) {
+        if (ObjectUtil.isNull(type)) {
+            type = 1;
         }
-        ChartDataVo chartDataVo = courseService.chartData2(course);
+        if (ObjectUtil.isNull(year)) {
+            year = 2023;
+        }
+        if (ObjectUtil.isNull(month)) {
+            month = 4;
+        }
+        ChartDataVo chartDataVo = courseService.chartData2(type,year,month);
         return Result.success(chartDataVo);
     }
 

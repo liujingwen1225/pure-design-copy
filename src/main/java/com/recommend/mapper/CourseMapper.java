@@ -39,5 +39,5 @@ public interface CourseMapper extends BaseMapper<Course> {
 
     List<ChartModel> hotTypeZb(List<String> typeList);
 
-    List<YearMonthAnalysis> yearData();
+    List<YearMonthAnalysis> yearData(Integer year, Integer month);
 }

@@ -62,6 +62,12 @@ public class User implements Serializable {
     @ApiModelProperty("课程类型")
     private String courseType;
 
+    @ApiModelProperty("学校名称")
+    private String schoolNames;
+
+    @ApiModelProperty("标签")
+    private String labels;
+
     @TableField(exist = false)
     private List<Course> courses;
 
