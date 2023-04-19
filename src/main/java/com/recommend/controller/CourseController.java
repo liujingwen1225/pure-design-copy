@@ -114,6 +114,13 @@ public class CourseController {
         return Result.success(courseList);
     }
 
+    @ApiOperation("课程类型列表")
+    @GetMapping("/schoolTypeList")
+    public Result schoolTypeList() {
+        List<Course> courseList = courseService.schoolTypeList();
+        return Result.success(courseList);
+    }
+
     @ApiOperation("用户类型：【1=新用户，2=老用户】")
     @GetMapping("/userType")
     public Result userType() {

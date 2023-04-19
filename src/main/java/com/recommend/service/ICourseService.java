@@ -73,4 +73,7 @@ public interface ICourseService extends IService<Course> {
     ChartDataVo chartData(Course course);
 
     ChartDataVo chartData2(Integer course, Integer year, Integer month);
+
+    List<Course> schoolTypeList();
+
 }

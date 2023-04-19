@@ -374,4 +374,9 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
         chartDataVo.setPopularSchoolNumberList(popularSchoolNumberList);
         return chartDataVo;
     }
+
+    @Override
+    public List<Course> schoolTypeList() {
+        return courseMapper.selectList(new LambdaQueryWrapper<Course>().select(Course::getSchool).ne(Course::getSchool, "").groupBy(Course::getSchool));
+    }
 }
